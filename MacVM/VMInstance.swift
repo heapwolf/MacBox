@@ -43,6 +43,21 @@ class VMInstance: NSObject, VZVirtualMachineDelegate {
         self.documentURL = documentURL
     }
     
+    func createLinuxBootLoader(kernelURL: URL, initialRamdiskURL: URL) -> VZBootLoader {
+        let bootLoader = VZLinuxBootLoader(kernelURL: kernelURL)
+        bootLoader.initialRamdiskURL = initialRamdiskURL
+
+        let kernelCommandLineArguments = [
+            // Use the first virtio console device as system console.
+            "console=hvc0",
+            // Stop in the initial ramdisk before attempting to transition to the root file system.
+            "rd.break=initqueue"
+        ]
+
+        bootLoader.commandLine = kernelCommandLineArguments.joined(separator: " ")
+        return bootLoader
+    }
+    
     func startInstaller(with ipswURL: URL,
                         skipActualInstallation: Bool,
                         completion: @escaping (Bool) -> Void) {
@@ -189,13 +204,13 @@ class VMInstance: NSObject, VZVirtualMachineDelegate {
             NSLog("Error: \(error)")
         }
     }
-    
+
     func stop() {
         self.virtualMachine?.stop(completionHandler: { _ in
             self.document?.isRunning = false
         })
     }
-    
+
     private func getVMConfiguration(hardwareModel: VZMacHardwareModel,
                                     machineIdentifier: VZMacMachineIdentifier,
                                     diskURL: URL,
@@ -203,31 +218,33 @@ class VMInstance: NSObject, VZVirtualMachineDelegate {
         guard let content = document?.content else {
             return nil
         }
-        
+
         let bootloader = VZMacOSBootLoader()
         let entropy = VZVirtioEntropyDeviceConfiguration()
         let networkDevice = VZVirtioNetworkDeviceConfiguration()
         networkDevice.attachment = VZNATNetworkDeviceAttachment()
-        
+
         let graphics = VZMacGraphicsDeviceConfiguration()
+        let bounds = NSScreen.main?.frame.size
+
         graphics.displays = [
             VZMacGraphicsDisplayConfiguration(
-                widthInPixels: 2560,
-                heightInPixels: 1600,
-                pixelsPerInch: 220
+                widthInPixels: Int(bounds!.width * 2),
+                heightInPixels: Int(bounds!.height * 2),
+                pixelsPerInch: 227
             )
         ]
-        
+
         let keyboard = VZUSBKeyboardConfiguration()
         let pointingDevice = VZUSBScreenCoordinatePointingDeviceConfiguration()
-        
+
         var storages: [VZStorageDeviceConfiguration] = []
         do {
             let attachment = try VZDiskImageStorageDeviceAttachment(
                 url: diskURL,
                 readOnly: false
             )
-            
+
             let storage = VZVirtioBlockDeviceConfiguration(attachment: attachment)
             storages.append(storage)
         } catch {

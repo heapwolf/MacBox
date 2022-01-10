@@ -19,6 +19,7 @@ struct VMInstallView: View {
     @State var cpuCount: Int = 2
     @State var memorySize: Int = 2
     @State var diskSize: String = "32"
+    @State var os: String = "Montery"
     
     @State var presentFileSelector = false
     @State var skipInstallation = false
@@ -38,7 +39,32 @@ struct VMInstallView: View {
         
         return availableOptions
     }()
-    
+
+    func download (os: String, completion: @escaping (URL?, Error?) -> Void) {
+        var url: URL
+
+        switch (os) {
+            case "Montery":
+                url = URL(string: "https://updates.cdn-apple.com/2021FCSFall/fullrestores/002-23780/D3417F21-41BD-4DDF-9135-FA5A129AF6AF/UniversalMac_12.0.1_21A559_Restore.ipsw")!
+                break
+            case "Big Sur":
+                url = URL(string: "https://updates.cdn-apple.com/2021FallFCS/fullrestores/071-97388/C361BF5E-0E01-47E5-8D30-5990BC3C9E29/UniversalMac_11.6_20G165_Restore.ipsw")!
+                break
+            case "Ubuntu":
+                url = URL(string: "https://releases.ubuntu.com/21.10/ubuntu-21.10-desktop-amd64.iso")!
+                break
+            default:
+            return
+        }
+
+        let task = URLSession.shared.downloadTask(with: url) {
+            (tempURL, response, error) in
+            completion(tempURL, nil)
+        }
+
+        task.resume()
+    }
+
     var body: some View {
         if let fileURL = fileURL {
             if let ipswURL = ipswURL {
@@ -63,7 +89,30 @@ struct VMInstallView: View {
                 .padding()
             } else {
                 VStack {
-                    Button("Select IPSW and Continue") {
+                    Picker("Operating System", selection: $os) {
+                        Text("Montery")
+                        Text("Big Sur")
+                        Text("Ubuntu")
+                    }
+                    Button("Download") {
+                        download(os: "Montery") { fileURL, err in
+                            if (err != nil) {
+                                return
+                            }
+                            
+                            document.createVMInstance(with: fileURL!)
+                            document.vmInstance?.diskImageSize = document.content.diskSize
+                            document.vmInstance?.startInstaller(
+                                with: fileURL!,
+                                skipActualInstallation: skipInstallation,
+                                completion: { _ in
+                                    save()
+                                }
+                            )
+                        }
+                    }
+                    
+                    Button("Select IPSW") {
                         presentFileSelector = true
                     }.fileImporter(
                         isPresented: $presentFileSelector,
@@ -110,10 +159,13 @@ struct VMInstallView: View {
                 }
                 
                 Section {
-                    Text("Save to continue...")
+                    Button("Continue", action: {
+                        NSApp.sendAction(#selector(NSDocument.save(_:)), to: nil, from: nil)
+                    })
                 }
             }
-            .padding()
+            .padding(150)
+            .frame(minWidth: 750, idealWidth: 600, minHeight: 450, idealHeight: 800)
             .onChange(of: cpuCount) { newValue in
                 document.content.cpuCount = newValue
                 save()

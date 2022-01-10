@@ -1,5 +1,8 @@
 # MacVM
 
+- Fixes full screen problem by removing toolbar adding start stop to the menubar.
+- Adds downloader for `.ipsw` image
+
 macOS Monterey added support for virtualizing macOS with Apple silicon host.
 
 This project provides an example project for the setup.
