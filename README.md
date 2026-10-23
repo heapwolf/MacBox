@@ -8,7 +8,7 @@ A small macOS virtual machine app for Apple silicon, built directly on Apple's V
 - Guest display resizes to fit the window
 - CPU, memory, and shared folders are editable while the VM is shut down
 
-Each VM is a `.macbox` document package containing its disk, NVRAM, and saved state.
+VMs live in `~/Library/Containers/com.heapwolf.MacBox/Data/Library/Application Support/VMs`, one folder each with its config, disk, NVRAM, and saved state.
 
 Requires macOS 15 or later on Apple silicon.
 

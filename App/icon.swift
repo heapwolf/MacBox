@@ -1,5 +1,5 @@
 // Renders the app icon: the Apple logo on a standard macOS icon tile.
-// Usage: swift App/icon.swift <output.iconset>
+// Usage: swiftc App/icon.swift -o icon && ./icon <output.iconset>
 
 import AppKit
 

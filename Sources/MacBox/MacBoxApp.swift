@@ -6,40 +6,18 @@ struct MacBoxApp: App {
     @NSApplicationDelegateAdaptor private var appDelegate: AppDelegate
 
     var body: some Scene {
-        DocumentGroup(newDocument: { VMDocument() }) { configuration in
-            // Set before any view reads it; it changes when the document is saved or moved.
-            configuration.document.fileURL = configuration.fileURL
-            return VMView(document: configuration.document)
+        Window("MacBox", id: "library") {
+            LibraryView()
+        }
+        .defaultSize(width: 900, height: 600)
+
+        WindowGroup(for: VirtualMachine.ID.self) { $id in
+            if let machine = Library.shared.machines.first(where: { $0.id == id }) {
+                MachineWindow(machine: machine)
+            }
         }
         .defaultSize(width: 1440, height: 900)
-        .commands {
-            VMCommands()
-        }
-    }
-}
-
-/// Acts on the VM in the key window.
-struct VMCommands: Commands {
-
-    @FocusedObject private var document: VMDocument?
-
-    var body: some Commands {
-        CommandMenu("Virtual Machine") {
-            let running = document?.state == .running
-
-            Button(document?.hasSavedState == true ? "Resume" : "Start") { document?.controller.start() }
-                .disabled(document?.canStart != true)
-            Button("Suspend") { document?.controller.suspend() }
-                .disabled(!running)
-            Divider()
-            Button("Shut Down") { document?.controller.requestStop() }
-                .disabled(!running)
-            Button("Force Stop") { document?.controller.forceStop() }
-                .disabled(!running)
-            Divider()
-            Button("Settings…") { document?.isShowingSettings = true }
-                .disabled(document?.canEditSettings != true)
-        }
+        .restorationBehavior(.disabled)
     }
 }
 
@@ -47,15 +25,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     /// Suspends running VMs before quitting so they come back where they were.
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        let active = VMController.all.allObjects.filter { $0.virtualMachine != nil }
+        let active = Library.shared.machines.filter { $0.virtualMachine != nil }
         guard !active.isEmpty else {
             return .terminateNow
         }
 
         let group = DispatchGroup()
-        for controller in active {
+        for machine in active {
             group.enter()
-            controller.suspendOrStop { group.leave() }
+            machine.suspendOrStop { group.leave() }
         }
         group.notify(queue: .main) { sender.reply(toApplicationShouldTerminate: true) }
         return .terminateLater

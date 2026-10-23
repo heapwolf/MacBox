@@ -9,7 +9,7 @@
 CONFIG ?= debug
 SIGN_IDENTITY ?= -
 
-SWIFT_BUILD := swift build -c $(CONFIG) --arch arm64
+SWIFT_BUILD := swift build -c $(CONFIG) --arch arm64 --disable-index-store
 APP := build/$(CONFIG)/MacBox.app
 CONTENTS := $(APP)/Contents
 
@@ -26,7 +26,8 @@ app:
 	mkdir -p $(CONTENTS)/MacOS $(CONTENTS)/Resources
 	cp "$$($(SWIFT_BUILD) --show-bin-path)/MacBox" $(CONTENTS)/MacOS/MacBox
 	cp App/Info.plist $(CONTENTS)/Info.plist
-	swift App/icon.swift build/AppIcon.iconset
+	swiftc -O App/icon.swift -o build/icon
+	build/icon build/AppIcon.iconset
 	iconutil -c icns build/AppIcon.iconset -o $(CONTENTS)/Resources/AppIcon.icns
 	codesign --force --sign "$(SIGN_IDENTITY)" \
 		--options runtime \
