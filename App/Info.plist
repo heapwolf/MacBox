@@ -5,20 +5,34 @@
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
-			<key>CFBundleTypeIconSystemGenerated</key>
-			<integer>1</integer>
 			<key>CFBundleTypeName</key>
-			<string>MacVM</string>
+			<string>MacBox Virtual Machine</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
-			<string>Default</string>
+			<string>Owner</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>org.oltica.vm.macos</string>
+				<string>com.heapwolf.macbox.vm</string>
 			</array>
 		</dict>
 	</array>
+	<key>CFBundleExecutable</key>
+	<string>MacBox</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.heapwolf.MacBox</string>
+	<key>CFBundleName</key>
+	<string>MacBox</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>2.0</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>15.0</string>
 	<key>UTExportedTypeDeclarations</key>
 	<array>
 		<dict>
@@ -27,21 +41,14 @@
 				<string>com.apple.package</string>
 			</array>
 			<key>UTTypeDescription</key>
-			<string>macOS VM</string>
-			<key>UTTypeIcons</key>
-			<dict>
-				<key>UTTypeIconBadgeName</key>
-				<string>Icon</string>
-				<key>UTTypeIconText</key>
-				<string>MacVM</string>
-			</dict>
+			<string>MacBox Virtual Machine</string>
 			<key>UTTypeIdentifier</key>
-			<string>org.oltica.vm.macos</string>
+			<string>com.heapwolf.macbox.vm</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
 				<array>
-					<string>macosvm</string>
+					<string>macbox</string>
 				</array>
 			</dict>
 		</dict>

@@ -1,14 +1,31 @@
-# MacVM
+# MacBox
 
-- Fixes full screen problem by removing toolbar adding start stop to the menubar.
-- Adds downloader for `.ipsw` image
+A small macOS virtual machine app for Apple silicon, built directly on Apple's Virtualization.framework. No third-party dependencies.
 
-macOS Monterey added support for virtualizing macOS with Apple silicon host.
+- Downloads the latest macOS restore image this Mac supports, or installs from an `.ipsw` you already have
+- Suspend and resume: a VM's memory is saved into its package when you suspend it, close its window, or quit the app, and it resumes where it left off
+- Shared folders, auto-mounted in the guest under `/Volumes/My Shared Files`
+- Guest display resizes to fit the window
+- CPU, memory, and shared folders are editable while the VM is shut down
 
-This project provides an example project for the setup.
+Each VM is a `.macbox` document package containing its disk, NVRAM, and saved state.
 
-<img width="771" alt="Config" src="https://user-images.githubusercontent.com/1725664/124231369-04456000-dac5-11eb-895c-af933a08a5d7.png">
+Requires macOS 15 or later on Apple silicon.
 
-<img width="769" alt="Install" src="https://user-images.githubusercontent.com/1725664/124231322-f68fda80-dac4-11eb-91b8-e29301f50430.png">
+## Building
 
-<img width="767" alt="Run" src="https://user-images.githubusercontent.com/1725664/124231661-6dc56e80-dac5-11eb-9fea-b6bcd4fb5db6.png">
+```sh
+make            # debug build -> build/debug/MacBox.app
+make run        # build and launch
+make release    # optimized build -> build/release/MacBox.app
+```
+
+`swift build` compiles the app, but Virtualization.framework only runs in a process signed with the `com.apple.security.virtualization` entitlement. The Makefile wraps the binary into an app bundle and signs it with `App/MacBox.entitlements`. It signs ad-hoc by default. To sign with your own identity, pass it in:
+
+```sh
+make SIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" release
+```
+
+## Credits
+
+Originally [MacVM](https://github.com/KhaosT/MacVM) by Khaos Tian.
